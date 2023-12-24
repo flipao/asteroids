@@ -71,6 +71,7 @@ func (g *Game) Update() error {
 		for j, b := range g.bullets {
 			if m.Collider().Intersects(b.Collider()) {
 				println("Meteor", i, "hit by Bullet", j)
+				m.Hit()
 				g.score++
 				g.meteors = append(g.meteors[:i], g.meteors[i+1:]...)
 				g.bullets = append(g.bullets[:j], g.bullets[j+1:]...)
@@ -80,6 +81,7 @@ func (g *Game) Update() error {
 	for i, m := range g.meteors {
 		if m.Collider().Intersects(g.player.Collider()) {
 			println("Player hit by Meteor", i)
+			g.player.Hit()
 			g.Reset()
 		}
 	}

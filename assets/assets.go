@@ -7,6 +7,8 @@ import (
 	"io/fs"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
@@ -18,6 +20,10 @@ var PlayerSprite = mustLoadImage("player.png")
 var MeteorSprites = mustLoadImages("meteors/*.png")
 var LaserSprite = mustLoadImage("laser.png")
 var ScoreFont = mustLoadFont("font.ttf")
+var Laser1SFX = mustLoadAudio("sfx/sfx_laser1.ogg")
+var Explosion1SFX = mustLoadAudio("sfx/sfx_explosion1.ogg")
+var Explosion2SFX = mustLoadAudio("sfx/sfx_explosion2.ogg")
+var Explosion3SFX = mustLoadAudio("sfx/sfx_explosion3.ogg")
 
 func mustLoadImage(path string) *ebiten.Image {
 	f, err := assets.Open(path)
@@ -68,4 +74,28 @@ func mustLoadFont(name string) font.Face {
 	}
 
 	return face
+}
+
+func mustLoadAudio(name string) *audio.Player {
+	f, err := assets.Open(name)
+	if err != nil {
+		panic(err)
+	}
+
+	s, err := vorbis.DecodeWithoutResampling(f)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx := audio.CurrentContext()
+	if ctx == nil {
+		ctx = audio.NewContext(48000)
+	}
+
+	p, err := ctx.NewPlayer(s)
+	if err != nil {
+		panic(err)
+	}
+
+	return p
 }

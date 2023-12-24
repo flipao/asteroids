@@ -6,6 +6,7 @@ import (
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
 const (
@@ -14,14 +15,16 @@ const (
 )
 
 type Meteor struct {
-	position      Vector
-	rotation      float64
-	movement      Vector
-	rotationSpeed float64
-	sprite        *ebiten.Image
+	position       Vector
+	rotation       float64
+	movement       Vector
+	rotationSpeed  float64
+	sprite         *ebiten.Image
+	explosionAudio *audio.Player
 }
 
 func NewMeteor(baseVelocity float64) *Meteor {
+	sprite := assets.MeteorSprites[rand.Intn(len(assets.MeteorSprites))]
 
 	// Figure out the target position - the screen center, in this case
 	target := Vector{
@@ -33,7 +36,7 @@ func NewMeteor(baseVelocity float64) *Meteor {
 	angle := rand.Float64() * 2 * math.Pi
 
 	// The distance from the center, the meteor should spawn at - half  the width
-	r := ScreenWidth / 2.0
+	r := ScreenWidth/2.0 + float64(sprite.Bounds().Dx())
 
 	// Figure out the spawn position by moving r pixels from the target at the chosen angle
 	pos := Vector{
@@ -59,15 +62,14 @@ func NewMeteor(baseVelocity float64) *Meteor {
 		Y: normalizedDirection.Y * velocity,
 	}
 
-	sprite := assets.MeteorSprites[rand.Intn(len(assets.MeteorSprites))]
-
 	println("new meteor")
 
 	return &Meteor{
-		position:      pos,
-		movement:      movement,
-		rotationSpeed: rotationSpeedMin + rand.Float64()*(rotationSpeedMax-rotationSpeedMin),
-		sprite:        sprite,
+		position:       pos,
+		movement:       movement,
+		rotationSpeed:  rotationSpeedMin + rand.Float64()*(rotationSpeedMax-rotationSpeedMin),
+		sprite:         sprite,
+		explosionAudio: assets.Explosion2SFX,
 	}
 }
 
@@ -94,4 +96,9 @@ func (m *Meteor) Collider() Rect {
 	bounds := m.sprite.Bounds()
 
 	return NewRect(m.position.X, m.position.Y, float64(bounds.Dx()), float64(bounds.Dy()))
+}
+
+func (m *Meteor) Hit() {
+	m.explosionAudio.Rewind()
+	m.explosionAudio.Play()
 }

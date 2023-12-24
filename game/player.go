@@ -6,24 +6,29 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
 const (
-	shootCooldown     = time.Millisecond * 500
+	shootCooldown     = 250 * time.Millisecond
 	rotationPerSecond = math.Pi
 	bulletSpawnOffset = 50.0
 )
 
 type Player struct {
-	game          *Game
-	position      Vector
-	rotation      float64
-	sprite        *ebiten.Image
+	game           *Game
+	position       Vector
+	rotation       float64
+	sprite         *ebiten.Image
+	laserAudio     *audio.Player
+	explosionAudio *audio.Player
+
 	shootCooldown *Timer
 }
 
 func NewPlayer(g *Game) *Player {
 	sprite := assets.PlayerSprite
+	laserAudio := assets.Laser1SFX
 
 	mp := MiddlePoint(sprite)
 
@@ -32,9 +37,12 @@ func NewPlayer(g *Game) *Player {
 		Y: ScreenHeight/2 - mp.Y,
 	}
 	return &Player{
-		game:          g,
-		position:      pos,
-		sprite:        sprite,
+		game:           g,
+		position:       pos,
+		sprite:         sprite,
+		laserAudio:     laserAudio,
+		explosionAudio: assets.Explosion1SFX,
+
 		shootCooldown: NewTimer(shootCooldown),
 	}
 }
@@ -52,8 +60,12 @@ func (p *Player) Update() {
 			Y: p.position.Y + mp.Y + math.Cos(p.rotation)*-bulletSpawnOffset,
 		}
 
+		p.laserAudio.Rewind()
+		p.laserAudio.Play()
+
 		bullet := NewBullet(spawnPos, p.rotation)
 		p.game.AddBullet(bullet)
+
 	}
 }
 
@@ -122,4 +134,9 @@ func (p *Player) Collider() Rect {
 	bounds := p.sprite.Bounds()
 
 	return NewRect(p.position.X, p.position.Y, float64(bounds.Dx()), float64(bounds.Dy()))
+}
+
+func (p *Player) Hit() {
+	p.explosionAudio.Rewind()
+	p.explosionAudio.Play()
 }
