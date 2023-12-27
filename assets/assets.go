@@ -17,7 +17,10 @@ import (
 var assets embed.FS
 
 var PlayerSprite = mustLoadImage("player.png")
-var MeteorSprites = mustLoadImages("meteors/*.png")
+var BigAsteroidSprites = mustLoadImages("asteroids/big/*.png")
+var MediumAsteroidSprites = mustLoadImages("asteroids/medium/*.png")
+var SmallAsteroidSprites = mustLoadImages("asteroids/small/*.png")
+var TinyAsteroidSprites = mustLoadImages("asteroids/tiny/*.png")
 var LaserSprite = mustLoadImage("laser.png")
 var ScoreFont = mustLoadFont("font.ttf")
 var Laser1SFX = mustLoadAudio("sfx/sfx_laser1.ogg")

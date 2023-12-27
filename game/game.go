@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"game/assets"
 	"image/color"
+	"math/rand"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -14,17 +15,17 @@ const (
 	ScreenWidth  = 800
 	ScreenHeight = 600
 
-	meteorSpawnTime     = 1 * time.Second
-	baseMeteorVelocity  = 0.25
+	meteorSpawnTime     = 2 * time.Second
+	baseMeteorVelocity  = 0.35
 	meteorSpeedUpAmount = 0.1
 	meteorSpeedUpTime   = 5 * time.Second
 )
 
 type Game struct {
-	player           *Player
-	meteorSpawnTimer *Timer
-	meteors          []*Meteor
-	bullets          []*Bullet
+	player             *Player
+	asteroidSpawnTimer *Timer
+	asteroids          []*Asteroid
+	bullets            []*Bullet
 
 	score int
 
@@ -34,9 +35,9 @@ type Game struct {
 
 func NewGame() *Game {
 	g := &Game{
-		meteorSpawnTimer: NewTimer(meteorSpawnTime),
-		baseVelocity:     baseMeteorVelocity,
-		velocityTimer:    NewTimer(meteorSpeedUpTime),
+		asteroidSpawnTimer: NewTimer(meteorSpawnTime),
+		baseVelocity:       baseMeteorVelocity,
+		velocityTimer:      NewTimer(meteorSpeedUpTime),
 	}
 
 	g.player = NewPlayer(g)
@@ -53,32 +54,33 @@ func (g *Game) Update() error {
 
 	g.player.Update()
 
-	g.meteorSpawnTimer.Update()
-	if g.meteorSpawnTimer.IsReady() {
-		g.meteorSpawnTimer.Reset()
+	g.asteroidSpawnTimer.Update()
+	if g.asteroidSpawnTimer.IsReady() {
+		g.asteroidSpawnTimer.Reset()
 
-		m := NewMeteor(g.baseVelocity)
-		g.meteors = append(g.meteors, m)
+		sizes := []AsteroidSize{SizeBig, SizeMedium, SizeSmall}
+
+		g.AddAsteroid(sizes[rand.Intn(len(sizes))], nil)
 	}
-	for _, m := range g.meteors {
+	for _, m := range g.asteroids {
 		m.Update()
 	}
 	for _, b := range g.bullets {
 		b.Update()
 	}
 	// Check meteors hits by bullets
-	for i, m := range g.meteors {
+	for i, m := range g.asteroids {
 		for j, b := range g.bullets {
 			if m.Collider().Intersects(b.Collider()) {
 				println("Meteor", i, "hit by Bullet", j)
 				m.Hit()
 				g.score++
-				g.meteors = append(g.meteors[:i], g.meteors[i+1:]...)
+				g.asteroids = append(g.asteroids[:i], g.asteroids[i+1:]...)
 				g.bullets = append(g.bullets[:j], g.bullets[j+1:]...)
 			}
 		}
 	}
-	for i, m := range g.meteors {
+	for i, m := range g.asteroids {
 		if m.Collider().Intersects(g.player.Collider()) {
 			println("Player hit by Meteor", i)
 			g.player.Hit()
@@ -92,7 +94,7 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.player.Draw(screen)
 
-	for _, m := range g.meteors {
+	for _, m := range g.asteroids {
 		m.Draw(screen)
 	}
 	for _, b := range g.bullets {
@@ -111,12 +113,17 @@ func (g *Game) AddBullet(b *Bullet) {
 	g.bullets = append(g.bullets, b)
 }
 
+func (g *Game) AddAsteroid(size AsteroidSize, fromAsteroid *Asteroid) {
+	a := NewAsteroid(g, size, g.baseVelocity, fromAsteroid)
+	g.asteroids = append(g.asteroids, a)
+}
+
 func (g *Game) Reset() {
 	g.player = NewPlayer(g)
-	g.meteors = nil
+	g.asteroids = nil
 	g.bullets = nil
 	g.score = 0
-	g.meteorSpawnTimer.Reset()
+	g.asteroidSpawnTimer.Reset()
 	g.baseVelocity = baseMeteorVelocity
 	g.velocityTimer.Reset()
 }
