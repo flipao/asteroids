@@ -82,8 +82,6 @@ func NewAsteroid(game *Game, size AsteroidSize, baseVelocity float64, fromAstero
 	if fromAsteroid != nil {
 		// Debris from a bigger asteroid will spawn from the original's asteroid position with less speed
 		pos = fromAsteroid.position
-		pos.X += rand.Float64()
-		pos.Y += rand.Float64()
 		velocity = fromAsteroid.velocity / 2
 	} else {
 		// Figure out the spawn position by moving r pixels from the target at the chosen angle
@@ -157,8 +155,8 @@ func (a *Asteroid) Hit() {
 		a.game.AddAsteroid(SizeMedium, a)
 		a.game.AddAsteroid(SizeSmall, a)
 	}
-	if a.size == SizeSmall {
-		a.game.AddAsteroid(SizeTiny, a)
+	if a.size == SizeMedium {
+		a.game.AddAsteroid(SizeSmall, a)
 		a.game.AddAsteroid(SizeTiny, a)
 	}
 }
