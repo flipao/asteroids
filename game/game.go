@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
@@ -22,6 +23,7 @@ const (
 )
 
 type Game struct {
+	background         *Background
 	player             *Player
 	asteroidSpawnTimer *Timer
 	asteroids          []*Asteroid
@@ -35,6 +37,7 @@ type Game struct {
 
 func NewGame() *Game {
 	g := &Game{
+		background:         NewBackground(),
 		asteroidSpawnTimer: NewTimer(meteorSpawnTime),
 		baseVelocity:       baseMeteorVelocity,
 		velocityTimer:      NewTimer(meteorSpeedUpTime),
@@ -51,6 +54,8 @@ func (g *Game) Update() error {
 		g.velocityTimer.Reset()
 		g.baseVelocity += meteorSpeedUpAmount
 	}
+
+	g.background.Update()
 
 	g.player.Update()
 
@@ -92,6 +97,8 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	g.background.Draw(screen)
+
 	g.player.Draw(screen)
 
 	for _, m := range g.asteroids {
@@ -103,6 +110,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	// Draw score
 	text.Draw(screen, fmt.Sprintf("%06d", g.score), assets.ScoreFont, ScreenWidth/2-100, 50, color.White)
+
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
