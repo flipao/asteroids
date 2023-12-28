@@ -63,7 +63,7 @@ func (g *Game) Update() error {
 	if g.asteroidSpawnTimer.IsReady() {
 		g.asteroidSpawnTimer.Reset()
 
-		sizes := []AsteroidSize{SizeBig, SizeMedium, SizeSmall}
+		sizes := []AsteroidSize{AsteroidSizeBig, AsteroidSizeMedium, AsteroidSizeSmall}
 
 		g.AddAsteroid(sizes[rand.Intn(len(sizes))], nil)
 	}

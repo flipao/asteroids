@@ -17,21 +17,21 @@ const (
 type AsteroidSize int
 
 const (
-	SizeBig AsteroidSize = iota
-	SizeMedium
-	SizeSmall
-	SizeTiny
+	AsteroidSizeBig AsteroidSize = iota
+	AsteroidSizeMedium
+	AsteroidSizeSmall
+	AsteroidSizeTiny
 )
 
 func (s AsteroidSize) String() string {
 	switch s {
-	case SizeBig:
+	case AsteroidSizeBig:
 		return "Big"
-	case SizeMedium:
+	case AsteroidSizeMedium:
 		return "Medium"
-	case SizeSmall:
+	case AsteroidSizeSmall:
 		return "Small"
-	case SizeTiny:
+	case AsteroidSizeTiny:
 		return "Tiny"
 	default:
 		panic("not reached")
@@ -41,9 +41,9 @@ func (s AsteroidSize) String() string {
 type Asteroid struct {
 	game           *Game
 	position       Vector
+	movement       Vector
 	rotation       float64
 	velocity       float64
-	movement       Vector
 	rotationSpeed  float64
 	sprite         *ebiten.Image
 	explosionAudio *audio.Player
@@ -53,11 +53,11 @@ type Asteroid struct {
 func NewAsteroid(game *Game, size AsteroidSize, baseVelocity float64, fromAsteroid *Asteroid) *Asteroid {
 	var sprites []*ebiten.Image
 	switch size {
-	case SizeBig:
+	case AsteroidSizeBig:
 		sprites = assets.BigAsteroidSprites
-	case SizeMedium:
+	case AsteroidSizeMedium:
 		sprites = assets.MediumAsteroidSprites
-	case SizeSmall:
+	case AsteroidSizeSmall:
 		sprites = assets.SmallAsteroidSprites
 	default:
 		sprites = assets.TinyAsteroidSprites
@@ -82,6 +82,8 @@ func NewAsteroid(game *Game, size AsteroidSize, baseVelocity float64, fromAstero
 	if fromAsteroid != nil {
 		// Debris from a bigger asteroid will spawn from the original's asteroid position with less speed
 		pos = fromAsteroid.position
+		pos.X += rand.Float64() * 5
+		pos.Y += rand.Float64() * 5
 		velocity = fromAsteroid.velocity / 2
 	} else {
 		// Figure out the spawn position by moving r pixels from the target at the chosen angle
@@ -151,12 +153,12 @@ func (a *Asteroid) Hit() {
 	a.explosionAudio.Rewind()
 	a.explosionAudio.Play()
 
-	if a.size == SizeBig {
-		a.game.AddAsteroid(SizeMedium, a)
-		a.game.AddAsteroid(SizeSmall, a)
+	if a.size == AsteroidSizeBig {
+		a.game.AddAsteroid(AsteroidSizeSmall, a)
+		a.game.AddAsteroid(AsteroidSizeSmall, a)
 	}
-	if a.size == SizeMedium {
-		a.game.AddAsteroid(SizeSmall, a)
-		a.game.AddAsteroid(SizeTiny, a)
+	if a.size == AsteroidSizeMedium {
+		a.game.AddAsteroid(AsteroidSizeSmall, a)
+		a.game.AddAsteroid(AsteroidSizeTiny, a)
 	}
 }

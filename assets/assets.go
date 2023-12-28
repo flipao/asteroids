@@ -16,7 +16,8 @@ import (
 //go:embed *
 var assets embed.FS
 
-var PlayerSprite = mustLoadImage("player.png")
+var PlayerSprite = mustLoadImage("player/player.png")
+var PlayerEngineFireSprites = mustLoadImages("player/fire_*.png")
 var BigAsteroidSprites = mustLoadImages("asteroids/big/*.png")
 var MediumAsteroidSprites = mustLoadImages("asteroids/medium/*.png")
 var SmallAsteroidSprites = mustLoadImages("asteroids/small/*.png")
