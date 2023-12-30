@@ -2,9 +2,11 @@ package game
 
 import (
 	"game/assets"
+	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 const (
@@ -19,10 +21,6 @@ type Bullet struct {
 
 func NewBullet(pos Vector, rotation float64) *Bullet {
 	sprite := assets.LaserSprite
-
-	mp := MiddlePoint(sprite)
-	pos.X -= mp.X
-	pos.Y -= mp.Y
 
 	return &Bullet{
 		position: pos,
@@ -42,9 +40,9 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 	mp := MiddlePoint(b.sprite)
 
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-mp.X, -mp.Y)
+	op.GeoM.Translate(-mp.X, -mp.X)
 	op.GeoM.Rotate(b.rotation)
-	op.GeoM.Translate(mp.X, mp.Y)
+	// op.GeoM.Translate(mp.X, mp.Y)
 
 	op.GeoM.Translate(b.position.X, b.position.Y)
 
@@ -54,5 +52,19 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 func (b *Bullet) Collider() Rect {
 	bounds := b.sprite.Bounds()
 
-	return NewRect(b.position.X, b.position.Y, float64(bounds.Dx()), float64(bounds.Dy()))
+	return NewRect(b.position.X-float64(bounds.Dx())/2, b.position.Y-float64(bounds.Dx())/2, float64(bounds.Dx()), float64(bounds.Dx()))
+}
+
+func (b *Bullet) DebugInfo(screen *ebiten.Image) {
+	rect := b.Collider()
+	vector.StrokeRect(
+		screen,
+		float32(rect.X),
+		float32(rect.Y),
+		float32(rect.Width),
+		float32(rect.Height),
+		1.0,
+		color.White,
+		false,
+	)
 }

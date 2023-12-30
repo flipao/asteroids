@@ -2,11 +2,13 @@ package game
 
 import (
 	"game/assets"
+	"image/color"
 	"math"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 const (
@@ -75,16 +77,16 @@ func NewAsteroid(game *Game, size AsteroidSize, baseVelocity float64, fromAstero
 	angle := rand.Float64() * 2 * math.Pi
 
 	// The distance from the center, the meteor should spawn at - half  the width
-	r := ScreenWidth/2.0 + float64(sprite.Bounds().Dx())
+	r := ScreenWidth / 2.0 // + float64(sprite.Bounds().Dx())
 
 	var pos Vector
 	var velocity float64
 	if fromAsteroid != nil {
 		// Debris from a bigger asteroid will spawn from the original's asteroid position with less speed
 		pos = fromAsteroid.position
-		pos.X += rand.Float64() * 5
-		pos.Y += rand.Float64() * 5
-		velocity = fromAsteroid.velocity / 2
+		pos.X += rand.Float64() * 10
+		pos.Y += rand.Float64() * 10
+		velocity = fromAsteroid.velocity / 3
 	} else {
 		// Figure out the spawn position by moving r pixels from the target at the chosen angle
 		pos = Vector{
@@ -161,4 +163,18 @@ func (a *Asteroid) Hit() {
 		a.game.AddAsteroid(AsteroidSizeSmall, a)
 		a.game.AddAsteroid(AsteroidSizeTiny, a)
 	}
+}
+
+func (a *Asteroid) DebugInfo(screen *ebiten.Image) {
+	rect := a.Collider()
+	vector.StrokeRect(
+		screen,
+		float32(rect.X),
+		float32(rect.Y),
+		float32(rect.Width),
+		float32(rect.Height),
+		1.0,
+		color.White,
+		false,
+	)
 }

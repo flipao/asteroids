@@ -9,6 +9,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
@@ -30,6 +31,7 @@ type Game struct {
 	bullets            []*Bullet
 
 	score int
+	debug bool
 
 	baseVelocity  float64
 	velocityTimer *Timer
@@ -93,6 +95,11 @@ func (g *Game) Update() error {
 		}
 	}
 
+	if inpututil.IsKeyJustPressed(ebiten.KeySlash) {
+		g.debug = !g.debug
+		println("Debug", g.debug)
+	}
+
 	return nil
 }
 
@@ -111,7 +118,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Draw score
 	text.Draw(screen, fmt.Sprintf("%06d", g.score), assets.ScoreFont, ScreenWidth/2-100, 50, color.White)
 
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))
+	if g.debug {
+		ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))
+		g.player.DebugInfo(screen)
+		for _, m := range g.asteroids {
+			m.DebugInfo(screen)
+		}
+		for _, b := range g.bullets {
+			b.DebugInfo(screen)
+		}
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

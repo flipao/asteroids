@@ -2,12 +2,14 @@ package game
 
 import (
 	"game/assets"
+	"image/color"
 	"math"
 	"math/rand"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 const (
@@ -64,13 +66,12 @@ func (p *Player) Update() {
 	p.shootCooldown.Update()
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
 		p.shootCooldown.Reset()
-		// mp := MiddlePoint(p.sprite)
 
 		spawnPos := Vector{
-			// X: p.position.X + mp.X + math.Sin(p.rotation)*bulletSpawnOffset,
-			// Y: p.position.Y + mp.Y + math.Cos(p.rotation)*-bulletSpawnOffset,
 			X: p.position.X + math.Sin(p.rotation)*bulletSpawnOffset,
 			Y: p.position.Y + math.Cos(p.rotation)*-bulletSpawnOffset,
+			// X: p.position.X + math.Sin(p.rotation)*bulletSpawnOffset,
+			// Y: p.position.Y + math.Cos(p.rotation)*-bulletSpawnOffset,
 		}
 
 		p.laserAudio.Rewind()
@@ -81,7 +82,6 @@ func (p *Player) Update() {
 	}
 
 	p.engineFireSprite = p.engineFireImages[rand.Intn(len(p.engineFireImages))]
-	// p.engineFireSprite = p.engineFireImages[0]
 }
 
 func (p *Player) rotate() {
@@ -138,22 +138,18 @@ func (p *Player) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-mp.X, -mp.Y)
 	op.GeoM.Rotate(p.rotation)
-	// op.GeoM.Translate(mp.X, mp.Y)
 
 	op.GeoM.Translate(p.position.X, p.position.Y)
 
 	screen.DrawImage(p.sprite, op)
 
 	mp2 := MiddlePoint(p.engineFireSprite)
-	// b := p.sprite.Bounds()
 
-	op = &ebiten.DrawImageOptions{}
+	op.GeoM.Reset()
 	op.GeoM.Translate(-mp2.X, mp.Y)
 	op.GeoM.Rotate(p.rotation)
-	// op.GeoM.Translate(mp2.X, -float64(b.Dy()))
 
 	op.GeoM.Translate(p.position.X, p.position.Y)
-	// op.GeoM.Translate(p.position.X+mp.X, p.position.Y)
 
 	screen.DrawImage(p.engineFireSprite, op)
 }
@@ -161,10 +157,45 @@ func (p *Player) Draw(screen *ebiten.Image) {
 func (p *Player) Collider() Rect {
 	bounds := p.sprite.Bounds()
 
-	return NewRect(p.position.X, p.position.Y, float64(bounds.Dx()), float64(bounds.Dy()))
+	x := p.position.X - float64(bounds.Dx())/2
+	y := p.position.Y - float64(bounds.Dy())/2
+
+	return NewRect(x, y, float64(bounds.Dx()), float64(bounds.Dy()))
 }
 
 func (p *Player) Hit() {
 	p.explosionAudio.Rewind()
 	p.explosionAudio.Play()
+}
+
+func (p *Player) DebugInfo(screen *ebiten.Image) {
+	rect := p.Collider()
+	// bounds := p.sprite.Bounds()
+
+	// vector.StrokeRect(
+	// 	screen,
+	// 	float32(bounds.Min.X),
+	// 	float32(bounds.Min.Y),
+	// 	float32(bounds.Dx()),
+	// 	float32(bounds.Dy()),
+	// 	1,
+	// 	color.White,
+	// 	false,
+	// )
+	vector.StrokeRect(
+		screen,
+		float32(rect.X),
+		float32(rect.Y),
+		float32(rect.Width),
+		float32(rect.Height),
+		1.0,
+		color.White,
+		false,
+	)
+	x0 := p.position.X
+	y0 := p.position.Y
+	x1 := p.position.X + math.Sin(p.rotation)*100
+	y1 := p.position.Y + math.Cos(p.rotation)*-100
+
+	vector.StrokeLine(screen, float32(x0), float32(y0), float32(x1), float32(y1), 1.0, color.White, false)
 }
