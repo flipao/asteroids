@@ -36,13 +36,9 @@ type Player struct {
 func NewPlayer(g *Game) *Player {
 	sprite := assets.PlayerSprite
 
-	// mp := MiddlePoint(sprite)
-
 	pos := Vector{
 		X: ScreenWidth / 2,
 		Y: ScreenHeight / 2,
-		// X: ScreenWidth/2 - mp.X,
-		// Y: ScreenHeight/2 - mp.Y,
 	}
 	return &Player{
 		game:     g,
@@ -70,8 +66,6 @@ func (p *Player) Update() {
 		spawnPos := Vector{
 			X: p.position.X + math.Sin(p.rotation)*bulletSpawnOffset,
 			Y: p.position.Y + math.Cos(p.rotation)*-bulletSpawnOffset,
-			// X: p.position.X + math.Sin(p.rotation)*bulletSpawnOffset,
-			// Y: p.position.Y + math.Cos(p.rotation)*-bulletSpawnOffset,
 		}
 
 		p.laserAudio.Rewind()
@@ -170,18 +164,7 @@ func (p *Player) Hit() {
 
 func (p *Player) DebugInfo(screen *ebiten.Image) {
 	rect := p.Collider()
-	// bounds := p.sprite.Bounds()
 
-	// vector.StrokeRect(
-	// 	screen,
-	// 	float32(bounds.Min.X),
-	// 	float32(bounds.Min.Y),
-	// 	float32(bounds.Dx()),
-	// 	float32(bounds.Dy()),
-	// 	1,
-	// 	color.White,
-	// 	false,
-	// )
 	vector.StrokeRect(
 		screen,
 		float32(rect.X),

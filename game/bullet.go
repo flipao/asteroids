@@ -42,7 +42,6 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-mp.X, -mp.X)
 	op.GeoM.Rotate(b.rotation)
-	// op.GeoM.Translate(mp.X, mp.Y)
 
 	op.GeoM.Translate(b.position.X, b.position.Y)
 
