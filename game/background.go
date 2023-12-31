@@ -1,7 +1,7 @@
 package game
 
 import (
-	"game/assets"
+	"asteroids/assets"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )

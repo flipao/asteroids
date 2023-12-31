@@ -1,8 +1,8 @@
 package game
 
 import (
+	"asteroids/assets"
 	"fmt"
-	"game/assets"
 	"image/color"
 	"math/rand"
 	"time"

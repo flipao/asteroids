@@ -1,7 +1,7 @@
 package main
 
 import (
-	"game/game"
+	"asteroids/game"
 	_ "image/png"
 
 	"github.com/hajimehoshi/ebiten/v2"

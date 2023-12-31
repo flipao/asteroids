@@ -1,4 +1,4 @@
-module game
+module asteroids
 
 go 1.20
 

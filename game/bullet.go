@@ -1,7 +1,7 @@
 package game
 
 import (
-	"game/assets"
+	"asteroids/assets"
 	"image/color"
 	"math"
 
